@@ -22,6 +22,7 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         'initialize',
         'config_form',
         'config',
+        'after_delete_element',
     );
 
     protected $_filters = array('admin_navigation_main');
@@ -52,6 +53,11 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookInitialize()
     {
         $this->_settings = json_decode(get_option('redact_elements_settings'), true);
+
+        // Override redactions for configured user roles.
+        if (in_array(current_user()->role, $this->_settings['overrides'])) {
+            return;
+        }
 
         foreach ($this->_settings['elements'] as $elementId => $patterns) {
             $sql = "
@@ -97,14 +103,38 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         $patterns = array();
         foreach ($post['regexs'] as $key => $regex) {
             if ('' == $regex) {
-                // @todo REMOVE DELETED PATTERNS FROM ALL REDACTED ELEMENTS
+                // Delete the pattern.
                 continue;
             }
             $patterns[$regex] = $post['labels'][$key];
         }
         $this->_settings['patterns'] = $patterns;
 
+        // Prepare the redacted elements.
+        foreach ($this->_settings['elements'] as $elementId => $patterns) {
+            foreach ($patterns as $patternKey => $pattern) {
+                if (!array_key_exists($pattern, $this->_settings['patterns'])) {
+                    // Remove deleted patterns from all redacted elements.
+                    unset($this->_settings['elements'][$elementId][$patternKey]);
+                }
+            }
+            if (empty($this->_settings['elements'][$elementId])) {
+                // Remove all elements that have no redactions.
+                unset($this->_settings['elements'][$elementId]);
+            }
+        }
+
         set_option('redact_elements_settings', json_encode($this->_settings));
+    }
+
+    public function hookAfterDeleteElement($args)
+    {
+        $elementId = $args['record']->id;
+        if (isset($this->_settings['elements'][$elementId])) {
+            // Remove the element from the settings.
+            unset($this->_settings['elements'][$elementId]);
+            set_option('redact_elements_settings', json_encode($this->_settings));
+        }
     }
 
     public function filterAdminNavigationMain($nav)
@@ -118,6 +148,10 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function redactCallback($text, $args)
     {
+        if (!$args['element_text']) {
+            // An element may not have text.
+            return;
+        }
         return get_view()->redact(
             $text,
             $this->_settings['elements'][$args['element_text']->element_id],

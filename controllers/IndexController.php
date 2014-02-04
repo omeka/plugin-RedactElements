@@ -5,8 +5,15 @@ class RedactElements_IndexController extends Omeka_Controller_AbstractActionCont
     {
         $settings = json_decode(get_option('redact_elements_settings'), true);
 
-        if ($this->getRequest()->isPost()) {
-            $settings['elements'] = $_POST['elements'];
+        if ($this->getRequest()->isPost() && is_array($_POST['elements'])) {
+            $elements = $_POST['elements'];
+            foreach ($elements as $elementId => $patterns) {
+                if (!is_array($patterns)) {
+                    // Remove all elements that have no redactions.
+                    unset($elements[$elementId]);
+                }
+            }
+            $settings['elements'] = $elements;
             set_option('redact_elements_settings', json_encode($settings));
         }
 

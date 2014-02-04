@@ -55,7 +55,7 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Settings that are saved during plugin installation
      */
     protected $_defaultSettings = array(
-        'overrides' => array(),
+        'overrides' => array('super'),
         'replacement' => '[REDACTED]',
         'patterns' => array(
             self::REGEX_EMAIL => 'Email Address',

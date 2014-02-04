@@ -51,8 +51,12 @@ characters should be redacted. For information on regular expressions, see
 <button id="add-new-pattern">Add New Pattern</button>
 
 <h3>Edit Existing Patterns</h3>
+<?php if (empty($settings['patterns'])): ?>
+<p>There are no existing patterns. Add a pattern using the above form.</p>
+<?php else: ?>
 <p>You can delete an existing pattern by removing its regular expression and
 saving changes.</p>
+<?php endif; ?>
 <?php foreach ($settings['patterns'] as $regex => $label): ?>
 <div class="field">
     <div class="two columns alpha">
@@ -69,9 +73,6 @@ saving changes.</p>
     </div>
 </div>
 <?php endforeach; ?>
-<?php if (empty($settings['patterns'])): ?>
-<p>There are no existing patterns. Add a pattern using the above form.</p>
-<?php endif; ?>
 
 <script>
 // Add a new pattern form block.

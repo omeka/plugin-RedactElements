@@ -1,6 +1,15 @@
 <?php
 /**
+ * Redact Elements
+ * 
+ * @copyright Copyright 2007-2014 Roy Rosenzweig Center for History and New Media
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt GNU GPLv3
+ */
+
+/**
  * Redact text view helper
+ * 
+ * @package Omeka\Plugins\RedactElements
  */
 class RedactElements_View_Helper_Redact extends Zend_View_Helper_Abstract
 {

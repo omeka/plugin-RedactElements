@@ -6,7 +6,8 @@ echo head($head);
 <section class="seven columns alpha">
 
 <h3>Add New Elements</h3>
-<p>Choose which patterns to redact from the selected element.</p>
+<p>Select an element and choose which patterns to redact from the selected element.
+To add more patterns, go to the <a href="plugins/config?name=RedactElements">Redact Elements plugin configuration page</a>.</p>
 <div class="field new-element">
     <div class="two columns alpha">
         <label for="">Add Element</label>
@@ -27,6 +28,12 @@ echo head($head);
 <button id="add-new-element">Add New Element</button>
 
 <h3>Edit Existing Elements</h3>
+<?php if (empty($this->settings['elements'])): ?>
+<p>There are no redacted elements. Add an element using the above form.</p>
+<?php else: ?>
+<p>You can remove an existing element by unchecking all its patterns and saving changes.</p>
+<?php endif; ?>
+
 <?php foreach ($this->settings['elements'] as $elementId => $regex): ?>
 <div class="field">
     <div class="two columns alpha">
@@ -47,9 +54,6 @@ echo head($head);
     </div>
 </div>
 <?php endforeach; ?>
-<?php if (empty($this->settings['elements'])): ?>
-<p>There are no redacted elements. Add an element using the above form.</p>
-<?php endif; ?>
 
 </section>
 <section class="three columns omega">

@@ -105,6 +105,7 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
             SELECT elements.name AS element_name, element_sets.name AS element_set_name
             FROM {$this->_db->Element} AS elements
             JOIN {$this->_db->ElementSet} AS element_sets
+            ON elements.element_set_id = element_sets.id
             WHERE elements.id = ?";
             $names = $this->_db->query($sql, array($elementId))->fetch();
 

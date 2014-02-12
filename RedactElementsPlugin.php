@@ -95,7 +95,10 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         $this->_settings = json_decode(get_option('redact_elements_settings'), true);
 
         // Override redactions for configured user roles.
-        if (in_array(current_user()->role, $this->_settings['overrides'])) {
+        $currentUser = current_user();
+        if ($currentUser instanceof User
+            && in_array($currentUser->role, $this->_settings['overrides'])
+        ) {
             return;
         }
 

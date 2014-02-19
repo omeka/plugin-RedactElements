@@ -44,6 +44,7 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         'config_form',
         'config',
         'after_delete_element',
+        'define_acl',
     );
 
     /**
@@ -196,6 +197,17 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
+     * Define the RedactElements ACL resource.
+     *
+     * @param array $args
+     */
+    public function hookDefineAcl($args)
+    {
+        $acl = $args['acl'];
+        $acl->addResource('RedactElements_Index');
+    }
+
+    /**
      * Add admin navigation.
      *
      * @param array $nav
@@ -205,7 +217,8 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $nav[] = array(
             'label' => 'Redact Elements',
-            'uri' => url('redact-elements')
+            'uri' => url('redact-elements'),
+            'resource' => 'RedactElements_Index',
         );
         return $nav;
     }

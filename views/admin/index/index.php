@@ -73,6 +73,7 @@ jQuery(document).on('click', 'select.new-element-select', function(event) {
 jQuery('#add-new-element').click(function(event) {
     event.preventDefault()
     jQuery('.new-element:first').clone().insertAfter('.new-element:last');
+    jQuery('.new-element:last select').attr('name', null);
     jQuery('.new-element:last input').attr('checked', false);
 });
 </script>

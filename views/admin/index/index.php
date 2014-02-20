@@ -13,15 +13,15 @@ To add more patterns, go to the <a href="plugins/config?name=RedactElements">Red
         <label for="">Add Element</label>
     </div>
     <div class="inputs five columns omega">
-        <?php echo $this->formSelect('', null, array(
+        <?php echo $this->formSelect(null, null, array(
             'multiple' => false,
             'class' => 'new-element-select'
         ), $this->select_elements) ?>
-        <?php foreach ($this->settings['patterns'] as $regex => $label): ?>
-        <?php echo $this->formCheckbox('', null, array(
+        <?php foreach ($this->settings['patterns'] as $id => $pattern): ?>
+        <?php echo $this->formCheckbox(null, null, array(
             'style' => 'margin-bottom:8px;',
             'disableHidden' => true,
-        ), array($regex)); ?> <?php echo $label; ?><br>
+        ), array($id)); ?> <?php echo $pattern['label']; ?><br>
         <?php endforeach; ?>
     </div>
 </div>
@@ -34,22 +34,22 @@ To add more patterns, go to the <a href="plugins/config?name=RedactElements">Red
 <p>You can remove an existing element by unchecking all its patterns and saving changes.</p>
 <?php endif; ?>
 
-<?php foreach ($this->settings['elements'] as $elementId => $regex): ?>
+<?php foreach ($this->settings['elements'] as $elementId => $patternIds): ?>
 <div class="field">
     <div class="two columns alpha">
         <label for="">Edit Element</label>
     </div>
     <div class="inputs five columns omega">
-        <?php echo $this->formSelect("elements[$elementId]", $elementId, array(
-            'multiple' => false,
-            'class' => 'new-element-select'
-        ), $this->select_elements) ?>
-        <?php foreach ($this->settings['patterns'] as $regex => $label): ?>
+        <p class="explanation">
+            <strong><?php echo $this->element_data[$elementId]['element_name']; ?></strong>
+            (<?php echo $this->element_data[$elementId]['element_set_name']; ?>)
+        </p>
+        <?php foreach ($this->settings['patterns'] as $patternId => $pattern): ?>
         <?php echo $this->formCheckbox("elements[$elementId][]", null, array(
             'style' => 'margin-bottom:8px;',
             'disableHidden' => true,
-            'checked' => in_array($regex, $this->settings['elements'][$elementId]),
-        ), array($regex)); ?> <?php echo $label; ?><br>
+            'checked' => in_array($patternId, $patternIds),
+        ), array($patternId)); ?> <?php echo $pattern['label']; ?><br>
         <?php endforeach; ?>
     </div>
 </div>

@@ -39,10 +39,10 @@ characters should be redacted. For information on regular expressions, see
         <label for="labels[]">Add Pattern</label>
     </div>
     <div class="inputs five columns omega">
-        <?php echo $view->formText("labels[]", null, array(
+        <?php echo $view->formText("new-labels[]", null, array(
             'placeholder' => 'Enter a label'
         )) ?>
-        <?php echo $view->formTextarea("regexs[]", null, array(
+        <?php echo $view->formTextarea("new-regexs[]", null, array(
             'rows' => 6,
             'placeholder' => 'Enter a regular expression',
         )) ?>
@@ -57,16 +57,16 @@ characters should be redacted. For information on regular expressions, see
 <p>You can delete an existing pattern by removing its regular expression and
 saving changes.</p>
 <?php endif; ?>
-<?php foreach ($settings['patterns'] as $regex => $label): ?>
+<?php foreach ($settings['patterns'] as $key => $pattern): ?>
 <div class="field">
     <div class="two columns alpha">
         <label for="labels[]">Edit Pattern</label>
     </div>
     <div class="inputs five columns omega">
-        <?php echo $view->formText("labels[]", $label, array(
+        <?php echo $view->formText("labels[$key]", $pattern['label'], array(
             'placeholder' => 'Enter a label'
         )) ?>
-        <?php echo $view->formTextarea("regexs[]", $regex, array(
+        <?php echo $view->formTextarea("regexs[$key]", $pattern['regex'], array(
             'rows' => 6,
             'placeholder' => 'Enter a regular expression',
         )) ?>

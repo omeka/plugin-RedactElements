@@ -59,9 +59,18 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         'overrides' => array('super'),
         'replacement' => '[REDACTED]',
         'patterns' => array(
-            self::REGEX_EMAIL => 'Email Address',
-            self::REGEX_URL => 'URL',
-            self::REGEX_IP => 'IP Address',
+            0 => array(
+                'label' => 'Email Address',
+                'regex' => self::REGEX_EMAIL,
+            ),
+            1 => array(
+                'label' => 'URL',
+                'regex' => self::REGEX_URL,
+            ),
+            2 => array(
+                'label' => 'IP Address',
+                'regex' => self::REGEX_IP,
+            ),
         ),
         'elements' => array(),
     );
@@ -104,7 +113,7 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         // Add element display filters.
-        foreach ($this->_settings['elements'] as $elementId => $patterns) {
+        foreach ($this->_settings['elements'] as $elementId => $patternIds) {
             $sql = "
             SELECT elements.name AS element_name, element_sets.name AS element_set_name
             FROM {$this->_db->Element} AS elements
@@ -154,28 +163,42 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
         // Set the replacement text.
         $this->_settings['replacement'] = $post['replacement'];
 
-        // Set the patterns.
-        $patterns = array();
-        foreach ($post['regexs'] as $key => $regex) {
+        // Process existing patterns.
+        foreach ($post['regexs'] as $patternId => $regex) {
             if ('' == $regex) {
-                // Delete the pattern.
+                // Remove deleted patterns.
+                unset($this->_settings['patterns'][$patternId]);
                 continue;
             }
-            $patterns[$regex] = $post['labels'][$key];
+            $this->_settings['patterns'][$patternId] = array(
+                'label' => $post['labels'][$patternId],
+                'regex' => $regex,
+            );
         }
-        $this->_settings['patterns'] = $patterns;
+
+        // Add new patterns.
+        foreach ($post['new-regexs'] as $key => $regex) {
+            if ('' == $regex) {
+                // Do not add a patterns without a regex.
+                continue;
+            }
+            $this->_settings['patterns'][] = array(
+                'label' => $post['new-labels'][$key],
+                'regex' => $regex,
+            );
+        }
 
         // Prepare the redacted elements.
-        foreach ($this->_settings['elements'] as $elementId => $patterns) {
-            foreach ($patterns as $patternKey => $pattern) {
-                if (!array_key_exists($pattern, $this->_settings['patterns'])) {
+        foreach ($this->_settings['elements'] as $elementId => $patternIds) {
+            foreach ($patternIds as $key => $patternId) {
+                if (!array_key_exists($patternId, $this->_settings['patterns'])) {
                     // Remove deleted patterns from all redacted elements.
-                    unset($this->_settings['elements'][$elementId][$patternKey]);
+                    unset($this->_settings['elements'][$elementId][$key]);
                 }
-            }
-            if (empty($this->_settings['elements'][$elementId])) {
-                // Remove elements that have no patterns.
-                unset($this->_settings['elements'][$elementId]);
+                if (empty($this->_settings['elements'][$elementId])) {
+                    // Remove elements that have no patterns.
+                    unset($this->_settings['elements'][$elementId]);
+                }
             }
         }
 
@@ -232,15 +255,21 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function redactCallback($text, $args)
     {
-        if (!$args['element_text']) {
+        $elementText = $args['element_text'];
+
+        if (!$elementText) {
             // An element may not have text.
             return;
         }
+
+        // Get the patterns by their pattern ID.
+        $patterns = array();
+        $patternIds = $this->_settings['elements'][$elementText->element_id];
+        foreach ($patternIds as $patternId) {
+            $patterns[] = $this->_settings['patterns'][$patternId]['regex'];
+        }
+
         // Call the redact text view helper.
-        return get_view()->redact(
-            $text,
-            $this->_settings['elements'][$args['element_text']->element_id],
-            $this->_settings['replacement']
-        );
+        return get_view()->redact($text, $patterns, $this->_settings['replacement']);
     }
 }

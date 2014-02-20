@@ -120,6 +120,9 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
 
         // Add element display filters.
         foreach ($this->_settings['elements'] as $elementId => $patternIds) {
+            // Get the element name and element set name. A direct query on the
+            // database is less intensive than getting the element record, which
+            // is a good idea for a hook that runs on every request.
             $sql = "
             SELECT elements.name AS element_name, element_sets.name AS element_set_name
             FROM {$this->_db->Element} AS elements

@@ -53,7 +53,13 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = array('admin_navigation_main');
 
     /**
-     * @var array Settings that are saved during plugin installation
+     * Settings that are saved during plugin installation.
+     *
+     * Note that the patterns array is keyed with persistent identifiers. This
+     * allows duplicate labels and regular expressions, and allows regular
+     * expressions to be modified without unlinking an element from a pattern.
+     *
+     * @var array
      */
     protected $_defaultSettings = array(
         'overrides' => array('super'),
@@ -182,6 +188,9 @@ class RedactElementsPlugin extends Omeka_Plugin_AbstractPlugin
                 // Do not add a patterns without a regex.
                 continue;
             }
+            // Note how new patterns are appended to the patterns array. The
+            // resulting key is n+1, where n is the highest existing key. This
+            // becomes the new pattern's persistent identifier.
             $this->_settings['patterns'][] = array(
                 'label' => $post['new-labels'][$key],
                 'regex' => $regex,
